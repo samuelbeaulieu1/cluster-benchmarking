@@ -13,7 +13,7 @@ done
 
 # Build docker image if not set or if manual build
 if [[ $BUILD = true ]] || [[ "$(sudo docker images -q flask-app-test 2> /dev/null)" == "" ]]; then
-    sudo docker build -t flask-app-test:latest .
+    sudo docker build -f ./benchmark/Dockerfile -t flask-app-test:latest ./benchmark
 fi
 
 # Run test with app url as input to script
