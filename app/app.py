@@ -3,8 +3,9 @@ import os
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
+@app.route('/<path:path>', methods=['GET'])
+@app.route('/', methods=['GET'])
+def home(path=""):
     instance_id = os.environ["INSTANCE_ID"]
     return f"Instance number {instance_id} is responding now!"
 
