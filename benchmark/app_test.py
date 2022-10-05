@@ -3,6 +3,8 @@ import requests
 import threading
 import time
 import os
+import boto3
+
 
 def call_endpoint_http(count: int = 1):
     url = os.environ["APP_URL"]
@@ -21,6 +23,19 @@ def seq_with_sleep_test():
     time.sleep(60)
 
     call_endpoint_http(1000)
+
+# TODO: Automatic call to terraform to setup environment ?
+def setup_env():
+    pass
+
+# TODO: Automatic call to terraform to teardown env ?
+def teardown_env():
+    pass
+
+# TODO: retrieve the actual metrics
+def retrieve_metrics():
+    cloudwatch = boto3.resource('cloudwatch')
+    metric = cloudwatch.Metric('namespace','name')
 
 if __name__ == "__main__":
     threading.Thread(target=seq_test).start()
