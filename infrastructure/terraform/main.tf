@@ -24,6 +24,9 @@ locals {
   app_id        = "8415-assignment-01"
   build_version = "1.0.0"
   ubuntu_ami    = "ami-08c40ec9ead489470"
+
+  cluster1_group_keys = toset(["1", "2", "3", "4", "5"])
+  cluster2_group_keys = toset(["6", "7", "8", "9"])
 }
 
 # External module used to build docker images and push them to ECR
@@ -34,26 +37,31 @@ module "docker_image" {
   ecr_repo        = "8415-ecr-repo"
   image_tag       = local.build_version
   source_path     = "../../app/"
+  
+  ec2_iam_role = "LabInstanceProfile"
 }
 
 module "ec2_instance-medium" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
 
-  for_each = toset(["1", "2", "3", "4", "5"])
+  for_each = local.cluster1_group_keys
 
   name = "instance-${each.key}"
 
-  ami                    = local.ubuntu_ami
-  instance_type          = "t2.micro"
-  key_name               = module.key_pair.key_pair_name
-  monitoring             = true
-  vpc_security_group_ids = [module.sg.id]
-  subnet_id              = module.vpc.private_subnets[0]
+  ami                         = local.ubuntu_ami
+  instance_type               = "t2.micro"
+  key_name                    = module.key_pair.key_pair_name
+  monitoring                  = true
+  vpc_security_group_ids      = [module.sg.id]
+  subnet_id                   = module.vpc.private_subnets[0]
+  associate_public_ip_address = true
+
+  iam_instance_profile = local.ec2_iam_role
 
   tags = {
-    Terraform   = "true"
-    Environment = "dev"
+    Terraform       = "true"
+    Environment     = "dev"
     Instance_number = "${each.key}"
   }
 }
@@ -62,20 +70,23 @@ module "ec2_instance-large" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
 
-  for_each = toset(["6", "7", "8", "9"])
+  for_each = local.cluster2_group_keys
 
   name = "instance-${each.key}"
 
-  ami                    = local.ubuntu_ami
-  instance_type          = "t2.micro"
-  key_name               = module.key_pair.key_pair_name
-  monitoring             = true
-  vpc_security_group_ids = [module.sg.id]
-  subnet_id              = module.vpc.private_subnets[1]
+  ami                         = local.ubuntu_ami
+  instance_type               = "t2.micro"
+  key_name                    = module.key_pair.key_pair_name
+  monitoring                  = true
+  vpc_security_group_ids      = [module.sg.id]
+  subnet_id                   = module.vpc.private_subnets[1]
+  associate_public_ip_address = true
+
+  iam_instance_profile = local.ec2_iam_role
 
   tags = {
-    Terraform   = "true"
-    Environment = "dev"
+    Terraform       = "true"
+    Environment     = "dev"
     Instance_number = "${each.key}"
   }
 }
