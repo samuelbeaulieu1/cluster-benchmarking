@@ -27,6 +27,8 @@ locals {
 
   cluster1_group_keys = toset(["1", "2", "3", "4", "5"])
   cluster2_group_keys = toset(["6", "7", "8", "9"])
+
+  ec2_iam_role = "LabInstanceProfile"
 }
 
 # External module used to build docker images and push them to ECR
@@ -37,8 +39,6 @@ module "docker_image" {
   ecr_repo        = "8415-ecr-repo"
   image_tag       = local.build_version
   source_path     = "../../app/"
-  
-  ec2_iam_role = "LabInstanceProfile"
 }
 
 module "ec2_instance-medium" {
