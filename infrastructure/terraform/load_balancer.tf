@@ -6,10 +6,10 @@ module "load_balancer" {
 
   load_balancer_type = "application"
 
-  vpc_id = "vpc-0f0d654f56847017e"
+  vpc_id = module.vpc.vpc_id
 
-  #                   us-east-1a                  us-east-1b               
-  subnets         = ["subnet-0f9c27cb92a403d4c", "subnet-01d573250fe77c7b4"]
+  #                  us-east-1a                     us-east-1b               
+  subnets         = module.vpc.private_subnets
   security_groups = [module.sg.id]
 
   target_groups = [
@@ -82,4 +82,9 @@ module "load_balancer" {
       }]
     }
   ]
+}
+
+output "lb-id" {
+  description = "The load balancer ID"
+  value = module.load_balancer.lb_id
 }

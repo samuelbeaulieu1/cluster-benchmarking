@@ -28,5 +28,10 @@ module "sg" {
     }
   ]
 
-  vpc_id = "vpc-0f0d654f56847017e"
+  vpc_id = module.vpc.vpc_id
+}
+
+output "sg-id" {
+  description = "The security group ID"
+  value = module.sg.id
 }
