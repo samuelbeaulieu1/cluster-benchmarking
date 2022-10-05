@@ -29,6 +29,11 @@ resource "aws_iam_policy" "policy" {
   })
 }
 
+resource "aws_iam_instance_profile" "ec2-profile" {
+  name = "ec2-profile"
+  role = "LabRole"
+}
+
 resource "aws_iam_policy_attachment" "ec2-policy-attach" {
   name       = "ec2-policy-attach"
   roles      = ["LabRole"]

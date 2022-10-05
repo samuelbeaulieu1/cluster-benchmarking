@@ -27,8 +27,6 @@ locals {
 
   cluster1_group_keys = toset(["1", "2", "3", "4", "5"])
   cluster2_group_keys = toset(["6", "7", "8", "9"])
-
-  ec2_iam_role = "LabInstanceProfile"
 }
 
 # External module used to build docker images and push them to ECR
@@ -57,7 +55,7 @@ module "ec2_instance-medium" {
   subnet_id                   = module.vpc.private_subnets[0]
   associate_public_ip_address = true
 
-  iam_instance_profile = local.ec2_iam_role
+  iam_instance_profile = aws_iam_instance_profile.ec2-profile.name
 
   tags = {
     Terraform       = "true"
@@ -82,7 +80,7 @@ module "ec2_instance-large" {
   subnet_id                   = module.vpc.private_subnets[1]
   associate_public_ip_address = true
 
-  iam_instance_profile = local.ec2_iam_role
+  iam_instance_profile = aws_iam_instance_profile.ec2-profile.name
 
   tags = {
     Terraform       = "true"
