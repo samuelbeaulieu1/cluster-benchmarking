@@ -9,7 +9,7 @@ data "aws_ecr_authorization_token" "token" {}
 
 # Configure the Providers
 provider "aws" {
-  region  = "us-east-1"
+  region = "us-east-1"
 }
 
 provider "docker" {
@@ -21,17 +21,62 @@ provider "docker" {
 }
 
 locals {
-  app_id = "8415-assignment-01"
+  app_id        = "8415-assignment-01"
+  build_version = "1.0.0"
 }
 
 # External module used to build docker images and push them to ECR
-module "lambda_docker-build" {
-  source  = "terraform-aws-modules/lambda/aws//modules/docker-build"
-  version = "4.0.2"
+module "docker_image" {
+  source = "terraform-aws-modules/lambda/aws//modules/docker-build"
+
+  create_ecr_repo = true
+  ecr_repo        = "8415-ecr-repo"
+  image_tag       = local.build_version
+  source_path     = "../../app/"
 }
 
+module "ec2_instance-medium" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  version = "~> 3.0"
 
+  for_each = toset(["1", "2", "3", "4", "5"])
 
+  name = "instance-${each.key}"
+
+  ami                    = "ami-ebd02392"
+  instance_type          = "t2.micro"
+  key_name               = "user1"
+  monitoring             = true
+  vpc_security_group_ids = ["sg-12345678"]
+  subnet_id              = "subnet-eddcdzz4"
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+    Instance_number = "${each.key}"
+  }
+}
+
+module "ec2_instance-large" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  version = "~> 3.0"
+
+  for_each = toset(["one", "two", "three"])
+
+  name = "instance-${each.key}"
+
+  ami                    = "ami-ebd02392"
+  instance_type          = "t2.micro"
+  key_name               = "user1"
+  monitoring             = true
+  vpc_security_group_ids = ["sg-12345678"]
+  subnet_id              = "subnet-eddcdzz4"
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
+}
 
 
 
