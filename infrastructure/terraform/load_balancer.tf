@@ -1,3 +1,17 @@
+locals {
+  target_group_health_check = {
+    enabled             = true
+    interval            = 30
+    path                = "/"
+    port                = "traffic-port"
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+    timeout             = 6
+    protocol            = "HTTP"
+    matcher             = "200-399"
+  }
+}
+
 module "load_balancer" {
   source  = "terraform-aws-modules/alb/aws"
   version = "~> 6.0"
@@ -8,7 +22,6 @@ module "load_balancer" {
 
   vpc_id = module.vpc.vpc_id
 
-  #                  us-east-1a                     us-east-1b               
   subnets         = module.vpc.private_subnets
   security_groups = [module.sg.id]
 
@@ -18,18 +31,30 @@ module "load_balancer" {
       backend_protocol = "HTTP"
       backend_port     = 80
       target_type      = "instance"
-      targets = {
 
+      targets = { for ec2_instance_key in local.cluster1_group_keys :
+        "instance-${ec2_instance_key}" => {
+          target_id = module.ec2_instance-medium[ec2_instance_key].id
+          port      = 80
+        }
       }
+
+      health_check = local.target_group_health_check
     },
     {
       name_prefix      = "c2-"
       backend_protocol = "HTTP"
       backend_port     = 80
       target_type      = "instance"
-      targets = {
-        
+
+      targets = { for ec2_instance_key in local.cluster2_group_keys :
+        "instance-${ec2_instance_key}" => {
+          target_id = module.ec2_instance-large[ec2_instance_key].id
+          port      = 80
+        }
       }
+
+      health_check = local.target_group_health_check
     }
   ]
 
@@ -86,10 +111,10 @@ module "load_balancer" {
 
 output "lb-id" {
   description = "The load balancer ID"
-  value = module.load_balancer.lb_id
+  value       = module.load_balancer.lb_id
 }
 
 output "lb-domain" {
   description = "The load balancer's domain"
-  value = module.load_balancer.lb_dns_name
+  value       = module.load_balancer.lb_dns_name
 }

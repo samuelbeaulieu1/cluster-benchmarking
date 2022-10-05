@@ -33,5 +33,5 @@ module "sg" {
 
 output "sg-id" {
   description = "The security group ID"
-  value = module.sg.id
+  value       = module.sg.id
 }

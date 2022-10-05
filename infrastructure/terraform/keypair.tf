@@ -18,5 +18,5 @@ output "public-key" {
 
 output "key-pair-name" {
   description = "Key pair name"
-  value = module.key_pair.key_pair_name
+  value       = module.key_pair.key_pair_name
 }
