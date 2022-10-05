@@ -23,6 +23,7 @@ provider "docker" {
 locals {
   app_id        = "8415-assignment-01"
   build_version = "1.0.0"
+  ubuntu_ami    = "ami-08c40ec9ead489470"
 }
 
 # External module used to build docker images and push them to ECR
@@ -43,12 +44,12 @@ module "ec2_instance-medium" {
 
   name = "instance-${each.key}"
 
-  ami                    = "ami-ebd02392"
+  ami                    = local.ubuntu_ami
   instance_type          = "t2.micro"
-  key_name               = "user1"
+  key_name               = module.key_pair.key_pair_name
   monitoring             = true
-  vpc_security_group_ids = ["sg-12345678"]
-  subnet_id              = "subnet-eddcdzz4"
+  vpc_security_group_ids = [module.sg.id]
+  subnet_id              = module.vpc.private_subnets[0]
 
   tags = {
     Terraform   = "true"
@@ -61,20 +62,21 @@ module "ec2_instance-large" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
 
-  for_each = toset(["one", "two", "three"])
+  for_each = toset(["6", "7", "8", "9"])
 
   name = "instance-${each.key}"
 
-  ami                    = "ami-ebd02392"
+  ami                    = local.ubuntu_ami
   instance_type          = "t2.micro"
-  key_name               = "user1"
+  key_name               = module.key_pair.key_pair_name
   monitoring             = true
-  vpc_security_group_ids = ["sg-12345678"]
-  subnet_id              = "subnet-eddcdzz4"
+  vpc_security_group_ids = [module.sg.id]
+  subnet_id              = module.vpc.private_subnets[1]
 
   tags = {
     Terraform   = "true"
     Environment = "dev"
+    Instance_number = "${each.key}"
   }
 }
 
