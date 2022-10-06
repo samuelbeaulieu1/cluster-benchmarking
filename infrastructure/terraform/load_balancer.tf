@@ -22,7 +22,7 @@ module "load_balancer" {
 
   vpc_id = module.vpc.vpc_id
 
-  subnets         = module.vpc.private_subnets
+  subnets         = module.vpc.public_subnets
   security_groups = [module.sg.id]
 
   target_groups = [
