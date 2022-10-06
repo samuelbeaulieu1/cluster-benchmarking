@@ -46,20 +46,23 @@ def retrieve_metrics():
     metric = cloudwatch.Metric('namespace', 'name')
 
 
-# def lambda_handler(event,context):
-#	ec2_client = boto3.client('ec2')
-#	CW_client = boto3.client('cloudwatch')
-#	region= 'us-east-1'
-#	ec2=boto3.resource('ec2', region_name=region)
-#	instances=ec2.instances.all()
-#	CPUUtilization_template = '[ "AWS/EC2", "CPUUtilization", "InstanceId", "{}" ]'
-#	CPUUtilization_array = []
-#	for inst in instances.all():
-#		instance_id=inst.id
-#		CPUUtilization_array.append(CPUUtilization_template.format(inst.id))
-#	CPUUtilization_string=",".join(CPUUtilization_array)
-#	CPUUtilization_instances = r'{"type": "metric","x": 0,"y": 0,"width": 6,"height": 6,"properties": {"view": "timeSeries","stacked": false,"metrics": [template],"region": "us-east-1"}}'.replace("template",CPUUtilization_string)
-#	response=CW_client_put_dashboard(DashboardName='testlambdafunction',DashboardBody='{"widgets":['+CPUUtilization_instances+']}')
+def lambda_handler(event, context):
+    ec2_client = boto3.client('ec2')
+    CW_client = boto3.client('cloudwatch')
+    region = 'us-east-1'
+    ec2 = boto3.resource('ec2', region_name=region)
+    instances = ec2.instances.all()
+    CPUUtilization_template = '[ "AWS/EC2", "CPUUtilization", "InstanceId", "{}" ]'
+    CPUUtilization_array = []
+    for inst in instances.all():
+        instance_id = inst.id
+        CPUUtilization_array.append(CPUUtilization_template.format(inst.id))
+    CPUUtilization_string = ",".join(CPUUtilization_array)
+    CPUUtilization_instances = r'{"type": "metric","x": 0,"y": 0,"width": 6,"height": 6,"properties": {"view": "timeSeries","stacked": false,"metrics": [template],"region": "us-east-1"}}'.replace(
+        "template", CPUUtilization_string)
+    response = CW_client_put_dashboard(
+        DashboardName='testlambdafunction', DashboardBody='{"widgets":['+CPUUtilization_instances+']}')
+
 
 if __name__ == "__main__":
     threading.Thread(target=seq_test).start()
