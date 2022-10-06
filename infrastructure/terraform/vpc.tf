@@ -20,13 +20,3 @@ module "vpc" {
     Environment = "dev"
   }
 }
-
-output "vpc-id" {
-  description = "The VPC id"
-  value       = module.vpc.vpc_id
-}
-
-output "vpc-subnets-id" {
-  description = "List of the VPC private subnetworks IDs"
-  value       = module.vpc.private_subnets
-}

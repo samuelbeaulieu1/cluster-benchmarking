@@ -30,8 +30,3 @@ module "sg" {
 
   vpc_id = module.vpc.vpc_id
 }
-
-output "sg-id" {
-  description = "The security group ID"
-  value       = module.sg.id
-}

@@ -51,11 +51,11 @@ module "ec2_instance-medium" {
   name = "instance-${each.key}"
 
   ami                         = local.ubuntu_ami
-  instance_type               = "t2.micro"
+  instance_type               = "m4.large"
   key_name                    = module.key_pair.key_pair_name
   monitoring                  = true
   vpc_security_group_ids      = [module.sg.id]
-  subnet_id                   = module.vpc.private_subnets[0]
+  subnet_id                   = module.vpc.public_subnets[0]
   associate_public_ip_address = true
 
   iam_instance_profile = aws_iam_instance_profile.ec2-profile.name
@@ -84,11 +84,11 @@ module "ec2_instance-large" {
   name = "instance-${each.key}"
 
   ami                         = local.ubuntu_ami
-  instance_type               = "t2.micro"
+  instance_type               = "t2.large"
   key_name                    = module.key_pair.key_pair_name
   monitoring                  = true
   vpc_security_group_ids      = [module.sg.id]
-  subnet_id                   = module.vpc.private_subnets[1]
+  subnet_id                   = module.vpc.public_subnets[1]
   associate_public_ip_address = true
 
   iam_instance_profile = aws_iam_instance_profile.ec2-profile.name

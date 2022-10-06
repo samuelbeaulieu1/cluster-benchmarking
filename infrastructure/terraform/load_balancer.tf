@@ -108,13 +108,3 @@ module "load_balancer" {
     }
   ]
 }
-
-output "lb-id" {
-  description = "The load balancer ID"
-  value       = module.load_balancer.lb_id
-}
-
-output "lb-domain" {
-  description = "The load balancer's domain"
-  value       = module.load_balancer.lb_dns_name
-}
