@@ -5,3 +5,5 @@ lib64
 .gitignore
 .vscode/
 .terraform
+*.tfstate
+*.tfstate.backup
