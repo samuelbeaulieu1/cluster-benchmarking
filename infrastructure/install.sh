@@ -22,4 +22,4 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plu
 sudo aws ecr get-login-password --region ${REGION} | sudo docker login --username AWS --password-stdin ${CONTAINER_REPOSITORY_URL}
 
 # Running app from docker container repository with env vars as input to script
-sudo docker run --restart always -d -e "INSTANCE_ID=$INSTANCE_ID" -p 80:5000 ${CONTAINER_REPOSITORY_URL}/flask-app:latest
+sudo docker run --restart always -d -e "INSTANCE_ID=${INSTANCE_ID}" -p 80:5000 ${CONTAINER_REPOSITORY_URL}/${REPO_NAME}:${BUILD_VERSION}

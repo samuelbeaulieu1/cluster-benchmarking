@@ -21,11 +21,12 @@ provider "docker" {
 }
 
 locals {
-  app_id        = "8415-assignment-01"
+  app_id              = "8415-assignment-01"
   install_script_path = "../install.sh"
-  build_version = "1.0.0"
-  ubuntu_ami    = "ami-08c40ec9ead489470"
-  ecr_address = format("%v.dkr.ecr.%v.amazonaws.com", data.aws_caller_identity.this.account_id, data.aws_region.current.name)
+  build_version       = "1.0.0"
+  ubuntu_ami          = "ami-08c40ec9ead489470"
+  ecr_address         = format("%v.dkr.ecr.%v.amazonaws.com", data.aws_caller_identity.this.account_id, data.aws_region.current.name)
+  ecr_name            = "8415-ecr-repo"
 
   cluster1_group_keys = toset(["1", "2", "3", "4", "5"])
   cluster2_group_keys = toset(["6", "7", "8", "9"])
@@ -36,7 +37,7 @@ module "docker_image" {
   source = "terraform-aws-modules/lambda/aws//modules/docker-build"
 
   create_ecr_repo = true
-  ecr_repo        = "8415-ecr-repo"
+  ecr_repo        = local.ecr_name
   image_tag       = local.build_version
   source_path     = "../../app/"
 }
@@ -58,7 +59,14 @@ module "ec2_instance-medium" {
   associate_public_ip_address = true
 
   iam_instance_profile = aws_iam_instance_profile.ec2-profile.name
-  user_data = templatefile("${local.install_script_path}", { REGION = var.region, CONTAINER_REPOSITORY_URL= local.ecr_address, INSTANCE_ID = each.key})
+
+  user_data = templatefile("${local.install_script_path}", {
+    REGION                   = var.region,
+    CONTAINER_REPOSITORY_URL = local.ecr_address,
+    INSTANCE_ID              = each.key,
+    REPO_NAME                = local.ecr_name,
+    BUILD_VERSION            = local.build_version
+  })
 
   tags = {
     Terraform       = "true"
@@ -85,7 +93,13 @@ module "ec2_instance-large" {
 
   iam_instance_profile = aws_iam_instance_profile.ec2-profile.name
 
-  user_data = templatefile("${local.install_script_path}", { REGION = var.region, CONTAINER_REPOSITORY_URL= local.ecr_address, INSTANCE_ID = each.key})
+  user_data = templatefile("${local.install_script_path}", {
+    REGION                   = var.region,
+    CONTAINER_REPOSITORY_URL = local.ecr_address,
+    INSTANCE_ID              = each.key,
+    REPO_NAME                = local.ecr_name,
+    BUILD_VERSION            = local.build_version
+  })
 
   tags = {
     Terraform       = "true"
@@ -93,8 +107,3 @@ module "ec2_instance-large" {
     Instance_number = "${each.key}"
   }
 }
-
-
-
-
-

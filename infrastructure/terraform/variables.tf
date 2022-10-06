@@ -9,6 +9,6 @@ variable "ecr_lifecycle_max_image_count" {
 }
 
 variable "region" {
-  type = string
+  type    = string
   default = "us-east-1"
 }
