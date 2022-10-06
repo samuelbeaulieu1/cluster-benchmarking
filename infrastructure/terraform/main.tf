@@ -22,8 +22,10 @@ provider "docker" {
 
 locals {
   app_id        = "8415-assignment-01"
+  install_script_path = "../install.sh"
   build_version = "1.0.0"
   ubuntu_ami    = "ami-08c40ec9ead489470"
+  ecr_address = format("%v.dkr.ecr.%v.amazonaws.com", data.aws_caller_identity.this.account_id, data.aws_region.current.name)
 
   cluster1_group_keys = toset(["1", "2", "3", "4", "5"])
   cluster2_group_keys = toset(["6", "7", "8", "9"])
@@ -56,6 +58,7 @@ module "ec2_instance-medium" {
   associate_public_ip_address = true
 
   iam_instance_profile = aws_iam_instance_profile.ec2-profile.name
+  user_data = templatefile("${local.install_script_path}", { REGION = var.region, CONTAINER_REPOSITORY_URL= local.ecr_address, INSTANCE_ID = each.key})
 
   tags = {
     Terraform       = "true"
@@ -81,6 +84,8 @@ module "ec2_instance-large" {
   associate_public_ip_address = true
 
   iam_instance_profile = aws_iam_instance_profile.ec2-profile.name
+
+  user_data = templatefile("${local.install_script_path}", { REGION = var.region, CONTAINER_REPOSITORY_URL= local.ecr_address, INSTANCE_ID = each.key})
 
   tags = {
     Terraform       = "true"

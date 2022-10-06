@@ -5,7 +5,7 @@
 ###### BEGIN
 terraform {
   backend "s3" {
-    bucket         = "8415-assignment-001-terraform-state"
+    bucket         = "8415-assignment-001-terraform-state-01"
     key            = "state/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
@@ -33,7 +33,7 @@ resource "aws_kms_alias" "key_alias" {
 # S3 Bucket (used to store tf state)
 #############################################
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "8415-assignment-001-terraform-state"
+  bucket = "8415-assignment-001-terraform-state-01"
 }
 
 resource "aws_s3_bucket_acl" "tf_state_bucket_acl" {
