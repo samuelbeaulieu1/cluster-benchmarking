@@ -27,7 +27,7 @@ module "load_balancer" {
 
   target_groups = [
     {
-      name_prefix      = "c1-"
+      name      = "cluster1"
       backend_protocol = "HTTP"
       backend_port     = 80
       target_type      = "instance"
@@ -42,7 +42,7 @@ module "load_balancer" {
       health_check = local.target_group_health_check
     },
     {
-      name_prefix      = "c2-"
+      name      = "cluster2"
       backend_protocol = "HTTP"
       backend_port     = 80
       target_type      = "instance"
