@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # TODO: Add argument support
-DEPLOY=true
+DEPLOY=false
 BUILD=true
 
 AWS_CREDENTIALS=~/.aws/credentials
@@ -9,10 +9,11 @@ DOCKER_SOCKET=/var/run/docker.sock
 
 TERRAFORM_IMAGE_TAG="hashicorp/terraform:1.3.2"
 
-while getopts b flag;
+while getopts db flag;
 do
     case "${flag}" in
         b) BUILD=true;;
+        d) DEPLOY=true;;
     esac
 done
 
@@ -40,42 +41,43 @@ if [[ -z $AWS_ACCESS_KEY_ID ]] || [[ -z $AWS_SECRET_ACCESS_KEY ]] || [[ -z $AWS_
     done
 fi
 
-# if [ $DEPLOY = true ]; then
-#     echo "Setting up AWS environment..."
-#     # Terraform init
-#     docker run \
-#         --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-#         --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-#         --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-#         --env AWS_REGION="us-east-1" \
-#         -v $(pwd)/infrastructure/:/root/infrastructure \
-#         -v $DOCKER_SOCKET:$DOCKER_SOCKET \
-#         -t $TERRAFORM_IMAGE_TAG \
-#         -chdir=/root/infrastructure/terraform/ init
+if [ $DEPLOY = true ]; then
+    echo "Setting up AWS environment..."
+    # Terraform init
+    docker run \
+        --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+        --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+        --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
+        --env AWS_REGION="us-east-1" \
+        -v $(pwd)/infrastructure/:/root/infrastructure \
+        -v $DOCKER_SOCKET:$DOCKER_SOCKET \
+        -t $TERRAFORM_IMAGE_TAG \
+        -chdir=/root/infrastructure/terraform/ init
 
-#     # Terraform apply
-#     docker run \
-#         --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-#         --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-#         --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-#         --env AWS_REGION="us-east-1" \
-#         -v $(pwd)/infrastructure/:/root/infrastructure \
-#         -v $DOCKER_SOCKET:$DOCKER_SOCKET \
-#         -t $TERRAFORM_IMAGE_TAG \
-#         -chdir=/root/infrastructure/terraform/ apply -auto-approve
-# fi
+    # Terraform apply
+    docker run \
+        --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+        --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+        --env AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
+        --env AWS_REGION="us-east-1" \
+        -v $(pwd)/infrastructure/:/root/infrastructure \
+        -v $(pwd)/app/:/root/app \
+        -v $DOCKER_SOCKET:$DOCKER_SOCKET \
+        -t $TERRAFORM_IMAGE_TAG \
+        -chdir=/root/infrastructure/terraform/ apply -auto-approve
+fi
 
 # Build docker image if not set or if manual build
-# if [[ $BUILD = true ]] || [[ "$(sudo docker images -q flask-app-test 2> /dev/null)" == "" ]]; then
-#     sudo docker build -f ./benchmark/Dockerfile -t flask-app-test:latest \
-#         --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
-#         --build-arg AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
-#         --build-arg AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
-#         ./benchmark
-# fi
+if [[ $BUILD = true ]] || [[ "$(sudo docker images -q flask-app-test 2> /dev/null)" == "" ]]; then
+    sudo docker build -f ./benchmark/Dockerfile -t flask-app-test:latest \
+        --build-arg AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+        --build-arg AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+        --build-arg AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
+        ./benchmark
+fi
 
 # Run test with app url as input to script
-# sudo docker run flask-app-test
+sudo docker run flask-app-test
 
 if [ $DEPLOY = true ]; then
     echo "Tearing down AWS environment..."

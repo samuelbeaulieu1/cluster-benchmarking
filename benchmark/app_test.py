@@ -40,9 +40,12 @@ def get_client(resource_name: str):
         aws_session_token=os.environ["AWS_SESSION_TOKEN"]
     )
 
+def get_target_group(cluster: str):
+    return get_client("elbv2").describe_target_groups(Names=[cluster])["TargetGroups"][0]
+
 def retrieve_metrics(start_date, end_date, cluster: str, load_balancer):
     load_balancer_arn = load_balancer["LoadBalancerArn"].split("loadbalancer/")[-1]
-    target_group_arn = elb.describe_target_groups(Names=[cluster])["TargetGroups"][0]["TargetGroupArn"].split(":")[-1]
+    target_group_arn = get_target_group(cluster)["TargetGroupArn"].split(":")[-1]
 
     lb_with_target_group_dimension = [
         {
@@ -115,9 +118,28 @@ def retrieve_metrics(start_date, end_date, cluster: str, load_balancer):
         
     print(f"Results for {cluster}:")
     print(metric_output)
+    
+def is_target_group_healthy(elb, cluster):
+    targets_health = elb.describe_target_health(TargetGroupArn=cluster["TargetGroupArn"])
+    
+    for target in targets_health["TargetHealthDescriptions"]:
+        if target["TargetHealth"]["State"] != "healthy":
+            return False
+        
+    return True
+    
+def wait_for_targets_health():
+    elb = get_client("elbv2")
+    cluster1 = get_target_group("cluster1")
+    cluster2 = get_target_group("cluster2")
 
+    while not is_target_group_healthy(elb, cluster1) or not is_target_group_healthy(elb, cluster2):
+        print("Waiting for the instances to launch the app...", flush=True)
+        time.sleep(10)
 
 if __name__ == "__main__":
+    wait_for_targets_health()
+    
     start = datetime.now()
     threads = []
     elb = get_client("elbv2")
@@ -133,7 +155,7 @@ if __name__ == "__main__":
     for thread in threads:
         thread.join()
         
-    print("Waiting for cloudwatch to update...")
+    print("Waiting for cloudwatch to update...", flush=True)
     time.sleep(120)
     
     end = datetime.now()
