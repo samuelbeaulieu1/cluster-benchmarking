@@ -1,8 +1,7 @@
 #!/bin/bash
 
-# TODO: Add argument support
 DEPLOY=false
-BUILD=true
+BUILD=false
 
 AWS_CREDENTIALS=~/.aws/credentials
 DOCKER_SOCKET=/var/run/docker.sock
